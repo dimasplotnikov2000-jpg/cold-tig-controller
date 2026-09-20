@@ -1,42 +1,46 @@
 # Cold tig controller
 
-An Arduino Nano based Cold TIG welding controller board designed to fit a 100 by 50 mm panel (2 layers PCB).
+# STRICT PCB ROUTING BRIEF (Skip Part Selection / Skip BOM Generation)
+# Target: Generate ONLY the 2-layer PCB layout and Gerber tracks view. 
+# Dimensions: 100mm x 50mm.
 
-Power Supply Constraints:
-- The board is powered by an external stable +5V DC power supply.
-- There is NO dedicated screw terminal block for power on the PCB. External 5V and GND wires will connect directly to the existing 5V and GND pins of the Arduino Nano board footprint.
+## STRICT OPERATIONAL COMMAND:
+- DO NOT use any part-selection, BOM, or component validation tools.
+- DO NOT search for manufacturer part numbers (MPNs).
+- Skip all documentation stages and proceed IMMEDIATELY to schematic netlist binding and PCB layout routing.
+- Use generic standard footprints only.
 
-Component Package and Footprint Constraints:
-- Microcontroller: Arduino Nano (through-hole DIP module footprint).
-- Transistors: Three generic NPN transistors in SOT-23 surface-mount package (matching MMBT4401 or similar).
-- Resistors: All resistors must use 0603 SMD packages.
-- Capacitors: All decoupling and filtering capacitors must use 0603 SMD packages.
-- Status LEDs: Three 3mm through-hole (DIP) LEDs.
-- Buttons: Four tactile push buttons, through-hole (DIP), 5mm diameter with 2 pins.
-- Optocouplers: Two generic PC817 optocouplers.
-- Connectors: 2-pin screw terminal blocks with 5.08mm pitch for external welding machine connections.
+## Component Footprints Configuration
+- Microcontroller: 1x Arduino Nano (Standard through-hole DIP-30 module package).
+- Transistors: 3x Generic NPN in SOT-23 surface-mount package.
+- Passive Components: All resistors and capacitors must use standard 0603 SMD footprints.
+- User Interface: 3x 3mm through-hole LEDs, 4x 2-pin 5mm tactile switches.
+- Connectors: 2x 2-pin screw terminals with 5.08mm pitch for external lines.
+- Optocouplers: 2x PC817 in standard DIP-4 or SMD-4 package.
 
-Hardware Design and Connections:
-1. Display Section: A generic 3-digit 7-segment common cathode LED display.
-   - Segments A, B, C, D, E, F, G connected to Arduino pins D9, D10, D11, D12, D13, A2, A3 respectively through 0603 220 Ohm current-limiting resistors.
-   - Digits DIG1, DIG2, DIG3 (cathodes) driven via the three SOT-23 NPN transistors controlled by Arduino pins A4, A5, A6 to protect MCU pins.
-2. User Interface: 
-   - Four 5mm 2-pin tactile buttons connected to GND: Torch Button (D2), Mode Button (D3), Plus Button (D4), Minus Button (D5).
-   - Three 3mm DIP status LEDs with 0603 220 Ohm series resistors connected to Arduino pins D6 (Mode 1), D7 (Mode 2), D8 (Mode 3) to ground.
-3. Output Interface (Welding Machine Trigger):
-   - One PC817 optocoupler. Arduino pin A0 (D14) drives the optocoupler's internal LED anode through an 0603 resistor. The phototransistor output (Collector/Emitter) connects to a 2-pin screw terminal block for the torch switch line. 
-   - Add an 0603 100 Ohm protection resistor in series with the collector.
-4. Input Interface (Arc Feedback from Welding Machine):
-   - One PC817 optocoupler. The input side connects to a 2-pin screw terminal block for the welding machine's PWM controller (Anode through an 0603 1k Ohm resistor, Cathode to machine GND).
-   - The phototransistor output side connects to Arduino pin A1 (D15) with a pull-up resistor.
+## Netlist and Trace Connections
+1. Display Tracks (3-Digit Common Cathode):
+   - Route tracks from Arduino Nano pins D9, D10, D11, D12, D13, A2, A3 through 0603 resistors (220 Ohm value) directly to display segments A, B, C, D, E, F, G.
+   - Route display multiplexing digits DIG1, DIG2, DIG3 to the Collectors of the 3x SOT-23 NPN transistors.
+   - Route Arduino Nano pins A4, A5, A6 to the Bases of these transistors via 0603 resistors. Emitters to Arduino GND.
 
-High-Frequency (HF) Oscillator Noise and Interference Protection:
-- Completely isolate the welding machine's electrical ground from the Arduino's ground plane.
-- Place an 0603 0.1uF ceramic decoupling capacitor physically close to the Torch Button input pin D2 on the board.
-- Place an 0603 0.1uF ceramic capacitor directly across pins 1 and 2 of the input feedback optocoupler.
-- Place an 0603 0.1uF ceramic capacitor directly across pins 3 and 4 of the input feedback optocoupler.
-- Place an 0603 0.1uF ceramic capacitor directly across the output pins of the output trigger optocoupler.
-- Keep all high-frequency signal traces as short as possible. Use a solid ground plane for the Arduino Nano section.
+2. UI & Controls Tracks:
+   - Route 4x 5mm buttons between Arduino pins D2, D3, D4, D5 and GND.
+   - Route 3x 3mm LEDs from Arduino pins D6, D7, D8 to GND via 0603 series resistors.
 
-System Instructions for Agent:
-- When generating the BOM stage, do not attempt to overwrite docs/BOM.md using write_file. Use edit_file instead to prevent file system errors.
+3. Isolated Output Trigger Tracks:
+   - Route Arduino pin A0 (D14) through an 0603 resistor to the PC817 internal LED input.
+   - Route the PC817 output phototransistor directly to the first 2-pin screw terminal block. Place one 0603 protection resistor inline with the Collector track.
+
+4. Isolated Arc Feedback Input Tracks:
+   - Route the second 2-pin screw terminal block directly to the second PC817 input LED pins.
+   - Route the phototransistor output to Arduino pin A1 (D15) with an 0603 pull-up resistor connection to the Nano 5V pin.
+
+## High-Frequency Noise Isolation & Routing Rules
+- Ground Plane Policy: Separate the PCB into two distinct zones. Fill the entire Arduino Nano digital section with a solid GND copper pour. The welding machine terminal section must be completely isolated (no ground sharing, no copper tracks crossing the barrier except inside the optocouplers).
+- Decoupling Capacitors Placement:
+  - Route one 0603 0.1uF capacitor directly adjacent to the Torch Button pin D2 track.
+  - Route one 0603 0.1uF capacitor directly across the input pins (1 and 2) of the feedback optocoupler.
+  - Route one 0603 0.1uF capacitor directly across the output pins (3 and 4) of the feedback optocoupler.
+  - Route one 0603 0.1uF capacitor directly across the trigger optocoupler output terminal block pins.
+- Track Width: Use thick traces for the terminal blocks and power lines, and standard signal traces for the Arduino digital lines. Keep HF lines as short as possible.
