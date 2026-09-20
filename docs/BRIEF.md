@@ -13,7 +13,7 @@ Component Package and Footprint Constraints:
 - Capacitors: All decoupling and filtering capacitors must use 0603 SMD packages.
 - Status LEDs: Three 3mm through-hole (DIP) LEDs.
 - Buttons: Four tactile push buttons, through-hole (DIP), 5mm diameter with 2 pins.
-- Optocouplers: Two generic PC817 optocouplers in DIP-4 or SMD package.
+- Optocouplers: Two generic PC817 optocouplers.
 - Connectors: 2-pin screw terminal blocks with 5.08mm pitch for external welding machine connections.
 
 Hardware Design and Connections:
@@ -37,3 +37,6 @@ High-Frequency (HF) Oscillator Noise and Interference Protection:
 - Place an 0603 0.1uF ceramic capacitor directly across pins 3 and 4 of the input feedback optocoupler.
 - Place an 0603 0.1uF ceramic capacitor directly across the output pins of the output trigger optocoupler.
 - Keep all high-frequency signal traces as short as possible. Use a solid ground plane for the Arduino Nano section.
+
+System Instructions for Agent:
+- When generating the BOM stage, do not attempt to overwrite docs/BOM.md using write_file. Use edit_file instead to prevent file system errors.
